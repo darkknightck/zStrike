@@ -1,0 +1,20 @@
+{
+  "name": "cs16-web-server",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "idb-keyval": "^6.2.2",
+    "jszip": "^3.10.1",
+    "xash3d-fwgs": "1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.6"
+  }
+}

@@ -1,0 +1,24 @@
+# --- Nội dung game của Valve / Nexon: KHÔNG đưa lên repo (bản quyền + dung lượng) ---
+# Tạo lại bằng: python3 scripts/build_packs.py all   (xem README)
+valve.zip
+hlds/
+web-ghcr/*.zip
+# Model nhân vật CSO (Angelina, Choi Ji Yoon) + chuỗi tên phe sinh từ file của Valve
+custom/cstrike/
+# Ảnh súng / nhân vật cho menu (chuyển từ gfx/vgui của Valve, ảnh CSO)
+web-ghcr-122/ui/
+
+# --- Sinh ra lúc chạy ---
+server-logs/
+web-ghcr-122/live/
+*.new
+
+# --- Client cũ (bản yohimik): sinh bởi ./prepare-client.sh ---
+web/main.js
+
+# --- Công cụ / hệ điều hành ---
+node_modules/
+package-lock.json
+screenshot.png
+.DS_Store
+__pycache__/

@@ -1,0 +1,30 @@
+# Chạy bằng image dựng sẵn ghcr.io/balintsoos/cs16-web-server (thay image yohimik đã bị xoá).
+# Dùng client web gốc của image (không có map picker của web/index.html).
+# Chạy: IP=$(ipconfig getifaddr en0) docker compose -f docker-compose.ghcr.yml up -d
+name: cs16-ghcr
+
+services:
+  cs16-web-server:
+    image: ghcr.io/balintsoos/cs16-web-server:latest
+    container_name: cs16-web-server
+    restart: unless-stopped
+    platform: linux/386
+    # Bọc engine bằng watchdog: crash thì thoát để Docker tự khởi động lại (xem server/watchdog.sh).
+    entrypoint: ["/bin/sh", "/watchdog.sh"]
+    # Map lúc khởi động: MAP=de_inferno ./restart-ghcr.sh
+    command: ["+map", "${MAP:-de_dust2}", "+maxplayers", "16"]
+    environment:
+      IP: ${IP:?đặt IP LAN của máy}
+      PORT: 27018
+    volumes:
+      - "./server/watchdog.sh:/watchdog.sh:ro"
+      - "./cstrike/server.cfg:/xashds/cstrike/server.cfg:ro"
+      - "./custom-maps/cs_mansion.bsp:/xashds/cstrike/maps/cs_mansion.bsp:ro"
+      # vá client: bỏ qua lỗi khi cache gamefiles.zip (434 MB) vượt giới hạn IndexedDB
+      - "./web-ghcr/index-D_oQDsUs.js:/xashds/public/assets/index-D_oQDsUs.js:ro"
+      # gamefiles.zip gốc + cs_mansion.bsp (client đã sửa FILE_KEY để tải file này)
+      - "./web-ghcr/gamefiles-mansion.zip:/xashds/public/gamefiles-mansion.zip:ro"
+    ports:
+      - "27016:27016"
+      - "27018:27018/tcp"
+      - "27018:27018/udp"

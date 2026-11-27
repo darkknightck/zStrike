@@ -1,0 +1,41 @@
+# Client build lại với engine xash3d-fwgs 1.2.2: renderer webgl2, font cho menu Esc.
+# Dùng kèm docker-compose.ghcr.yml (restart-ghcr.sh tự thêm file này, trừ khi CLIENT=old).
+#
+# Nguồn build: web-ghcr-122/src (client balintsoos đã sửa + thư viện CS lấy từ image).
+# Vá thêm trong engine (assets/xash-*.wasm): chuỗi host_ver "%i 0.21 %s %s %s" ->
+# "9999%c %s %s %s " vì bản npm có build = -1, client CS đòi build >= 4190.
+services:
+  cs16-web-server:
+    volumes:
+      - "./web-ghcr-122/index.html:/xashds/public/index.html:ro"
+      - "./web-ghcr-122/assets:/xashds/public/assets:ro"
+      - "./web-ghcr-122/bg.jpg:/xashds/public/bg.jpg:ro"
+      # Gói game rút gọn (~210 MB): bỏ map/video/âm thanh Half-Life và thư viện native.
+      - "./web-ghcr/gamefiles-lite.zip:/xashds/public/gamefiles-lite.zip:ro"
+      # Gói HD (~97 MB) lọc từ "Ultimate HD Pack by ralex": model, bầu trời, detail textures.
+      # Không gồm WAD (sai tỉ lệ texture), BSP (lệch map với server), file chạy được,
+      # model nhân vật và sprites (server kiểm tra nguyên vẹn các file này và bị crash).
+      # Người chơi bỏ HD: thêm ?hd=0 vào link.
+      - "./web-ghcr/hd-pack.zip:/xashds/public/hd-pack.zip:ro"
+      # Model tuỳ chỉnh: cùng 1 file cho server (mount) và client (custom-pack.zip).
+      # Angelina (CSO) thay Elite Crew. Xem custom/README.txt.
+      - "./custom/cstrike/models/player/leet/leet.mdl:/xashds/cstrike/models/player/leet/leet.mdl:ro"
+      # Choi Ji Yoon (CSO) thay GSG-9 (đội CT / zSafety, số 2)
+      - "./custom/cstrike/models/player/gsg9/gsg9.mdl:/xashds/cstrike/models/player/gsg9/gsg9.mdl:ro"
+      - "./web-ghcr/custom-pack.zip:/xashds/public/custom-pack.zip:ro"
+      # Ảnh súng / nhân vật cho menu HTML (chuyển từ gfx/vgui/*.tga)
+      - "./web-ghcr-122/ui:/xashds/public/ui:ro"
+      # Log sự kiện (server.cfg: log on) -> container score tính bảng điểm -> live/score.json
+      - "./server-logs:/xashds/cstrike/logs"
+      - "./web-ghcr-122/live:/xashds/public/live:ro"
+
+  # Đọc log, ghi live/score.json cho bảng điểm (phím Tab). Chỉ dùng thư viện chuẩn Python.
+  score:
+    image: python:3.12-alpine
+    container_name: cs16-score
+    restart: unless-stopped
+    command: ["python", "-u", "/app/score.py"]
+    volumes:
+      - "./scoreboard/score.py:/app/score.py:ro"
+      - "./server-logs:/logs:ro"
+      - "./web-ghcr-122/live:/out"
